@@ -5,8 +5,8 @@ from hunter import Hunter, PlayerHunter
 
 def main():
     t = Town()
-    t.load_empty_state()
-    t.spawn_citizen(location=(25, 25))
+    t.load_empty_state(size=30)
+    t.spawn_citizen(location=(29, 29))
     t.spawn_hunter()
 
     count = 0
@@ -14,7 +14,12 @@ def main():
         if count > 50: break
         t.iterate()
         print(t)
-        time.sleep(0.1)
+        for citizen in t.citizens:
+            if citizen.score["caught"]:
+                print("DONE")
+                print(citizen.score)
+                return
+        time.sleep(0.05)
         count += 1
 
 if __name__ == '__main__':

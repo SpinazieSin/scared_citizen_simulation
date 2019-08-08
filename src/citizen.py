@@ -27,7 +27,7 @@ class Citizen():
 
         # Agent stats.
         self.label = "C"
-        self.vision = np.zeros([8, 8, 2])
+        self.vision = np.zeros([])
         self.actions = {"Up":    (0, -1),
                         "Down":  (0, 1),
                         "Left":  (-1, 0),
@@ -54,7 +54,7 @@ class Citizen():
     def update_location(self, move=(0, 0)):
         self.location += move
         self.score["survival_time"] += 1
-        self.score["steps"] += sum(move)
+        self.score["steps"] += sum(np.abs(move))
 
 
 if __name__ == '__main__':
