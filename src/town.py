@@ -17,6 +17,7 @@ class Town:
                              "H": 1,
                              "C": 2}
         self.object_layer_keys = ["B", "H", "C"]
+        self.layer_size = len(self.object_layer_keys)
 
     def __repr__(self):
         state_string = ""
@@ -32,11 +33,25 @@ class Town:
             state_string += row_rep + "\n"
         return state_string
 
+    def is_legal_move(self, move, agent):
+        try:
+            new_x = agent.location[0] + move[0]
+            new_y = agent.location[1] + move[1]
+            for check_block in range(self.layer_size):
+                if self.state[new_x, new_y, check_block] > 0:
+                    return False
+                else:
+                    return True
+        except:
+            return False
+
     def iterate(self):
         for agent in self.objects:
             move = agent.step()
-            print(move)
-            agent.update_location(move)
+            if self.is_legal_move(move, agent):
+                self.state[(agent.location[0], agent.location[1], self.object_layer[agent.label])] = 0
+                agent.update_location(move)
+                self.state[(agent.location[0], agent.location[1], self.object_layer[agent.label])] = 1
 
     def load_state_from_file(self, path):
         f = open(path, "r")
@@ -65,7 +80,6 @@ if __name__ == '__main__':
     t = Town()
     # t.load_state_from_file(path="layouts/basic_layout.txt")
     t.load_empty_state()
-    t.spawn_citizen()
+    t.spawn_citizen(location=(25,25))
     t.iterate()
     print(t)
-    print(t.objects[0].location)
