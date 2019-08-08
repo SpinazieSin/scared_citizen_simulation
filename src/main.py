@@ -6,14 +6,15 @@ from hunter import Hunter, PlayerHunter
 def main():
     t = Town()
     t.load_empty_state()
-    t.spawn_citizen()
+    t.spawn_citizen(location=(25, 25))
+    t.spawn_hunter()
 
     count = 0
     while True:
         if count > 50: break
         t.iterate()
         print(t)
-        time.sleep(1)
+        time.sleep(0.1)
         count += 1
 
 if __name__ == '__main__':

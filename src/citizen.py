@@ -1,3 +1,4 @@
+import neat
 import numpy as np
 from numpy.random import randint
 
@@ -8,6 +9,15 @@ class Citizen():
     and use the environment to its advantage.
     The citizen should be as annoying as possible for a hunter player
     """
+
+    INITIAL_POPULATION_SIZE = 400
+    N_PARENTS_NEW_GEN = 8
+    N_MUTATED_PARENTS_NEW_GEN = 20
+    N_MATES_NEW_GEN = 20
+    PROB_WEIGHT_CHANGE = 0.5
+    GAMMA = 0.1
+
+    N_GEN = 100
 
     def __init__(self, location=(0, 0)):
         # Performance evaluation criteria.
@@ -43,6 +53,8 @@ class Citizen():
 
     def update_location(self, move=(0, 0)):
         self.location += move
+        self.score["survival_time"] += 1
+        self.score["steps"] += sum(move)
 
 
 if __name__ == '__main__':

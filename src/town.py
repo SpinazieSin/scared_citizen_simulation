@@ -1,5 +1,6 @@
 import numpy as np
 import neat as nt
+from numpy.random import randint
 from citizen import Citizen
 from hunter import Hunter, PlayerHunter
 
@@ -13,6 +14,8 @@ class Town:
         self.initial_state = []
         self.state = []
         self.objects = []
+        self.hunters = []
+        self.citizens = []
         self.object_layer = {"B": 0,
                              "H": 1,
                              "C": 2}
@@ -37,6 +40,7 @@ class Town:
         try:
             new_x = agent.location[0] + move[0]
             new_y = agent.location[1] + move[1]
+            if new_x < 0 or new_y < 0: return False
             for check_block in range(self.layer_size):
                 if self.state[new_x, new_y, check_block] > 0:
                     return False
@@ -45,14 +49,25 @@ class Town:
         except:
             return False
 
+    def move_agent(self, agent, move):
+        self.state[(agent.location[0], agent.location[1], self.object_layer[agent.label])] = 0
+        agent.update_location(move)
+        self.state[(agent.location[0], agent.location[1], self.object_layer[agent.label])] = 1
+
     def iterate(self):
-        for agent in self.objects:
+        # Move hunters
+        for agent in self.hunters:
+            target = self.citizens[randint(len(self.citizens))]
+            move = agent.step(target=target.location)
+            if self.is_legal_move(move, agent):
+                self.move_agent(agent, move)
+
+        # Move citizens
+        for agent in self.citizens:
             move = agent.step()
             if self.is_legal_move(move, agent):
-                self.state[(agent.location[0], agent.location[1], self.object_layer[agent.label])] = 0
-                agent.update_location(move)
-                self.state[(agent.location[0], agent.location[1], self.object_layer[agent.label])] = 1
-
+                self.move_agent(agent, move)
+    
     def load_state_from_file(self, path):
         f = open(path, "r")
         while True:
@@ -68,11 +83,11 @@ class Town:
             [size, size, len(self.object_layer)])
 
     def spawn_hunter(self, location=(0, 0)):
-        self.objects.append(Hunter(location))
+        self.hunters.append(Hunter(location))
         self.state[(location[0], location[1], self.object_layer["H"])] = 1
 
     def spawn_citizen(self, location=(0, 0)):
-        self.objects.append(Citizen(location))
+        self.citizens.append(Citizen(location))
         self.state[(location[0], location[1], self.object_layer["C"])] = 1
 
 
