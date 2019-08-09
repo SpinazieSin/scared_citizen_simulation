@@ -12,7 +12,7 @@ from town import Town
 from neat import nn
 
 # load the winner
-with open('winner-feedforward', 'rb') as f:
+with open('winner-feedforward.model', 'rb') as f:
     c = pickle.load(f)
 
 print('Loaded genome:')

@@ -76,7 +76,7 @@ def run():
     winner = pop.run(pe.evaluate)
 
     # Save the winner.
-    with open('winner-feedforward', 'wb') as f:
+    with open('winner-feedforward.model', 'wb') as f:
         pickle.dump(winner, f)
 
     visualize.plot_stats(stats, ylog=True, view=True, filename="feedforward-fitness.svg")
