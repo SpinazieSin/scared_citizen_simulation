@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.random import randint
 
+
 class Hunter():
     """
     You might not know this
@@ -28,6 +29,8 @@ class Hunter():
         # First in case target is undefined, second for divide by 0.
         try:
             heuristic = target - self.location
+            # if 0 in heuristic:
+            #     return (0, 0)
             try:
                 if np.abs(heuristic[0]) >= np.abs(heuristic[1]):
                     return (int(heuristic[0]/np.abs(heuristic[0])), 0)
@@ -44,6 +47,7 @@ class Hunter():
     def update_location(self, move=(0, 0)):
         self.location += move
 
+
 class PlayerHunter():
     """
     The user is also able to take control of the hunter for testing.
@@ -51,6 +55,7 @@ class PlayerHunter():
 
     def __init__(self):
         pass
+
 
 if __name__ == '__main__':
     pass

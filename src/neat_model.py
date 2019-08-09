@@ -1,57 +1,96 @@
 import neat
+import visualize
 import numpy as np
+import os
+import pickle
+from town import Town
 
-class NeatModel(object):
-    """docstring for NeatModel"""
+runs_per_net = 5
 
-    def __init__(self):
-        pass
+# Use the NN network phenotype and the discrete actuator force function.
+def eval_genome(genome, config):
+    net = neat.nn.FeedForwardNetwork.create(genome, config)
 
-    def get_config(self, config_file):
-        # Load configuration.
-        config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                             neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                             config_file)
+    fitnesses = []
 
- 
-"""
-2-input XOR example -- this is most likely the simplest possible example.
-"""
+    for runs in range(runs_per_net):
+        sim = Town()
+        sim.load_empty_state(size=10)
+        sim.spawn_citizen(location=(5, 5))
+        offsetx = 0
+        offsety = 0
+        while offsetx != 0 and offsety != 0:
+            offsetx = randint(-5, 5)
+            offsety = randint(-5, 5)
+        sim.spawn_hunter(location=(5+offsetx, 5+offsety))
 
-# 2-input XOR inputs and expected outputs.
-xor_inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
-xor_outputs = [   (0.0,),     (1.0,),     (1.0,),     (0.0,)]
+        # Run the given simulation for up to num_steps time steps.
+        fitness = 0.0
+        caught = False
+        max_sim_iterations = 100
+        iteration = 0
+        while iteration < max_sim_iterations:
+            for citizen in sim.citizens:
+                inputs = citizen.vision.flatten()
+                citizen.action_preference = net.activate(inputs)
+
+            sim.iterate()
+
+            for citizen in sim.citizens:
+                if citizen.score["caught"]:
+                    caught = True
+                fitness = citizen.score["survival_time"]/citizen.score["steps"]
+            if caught:
+                fitness = citizen.score["survival_time"]
+                break
+
+            iteration += 1
+
+        fitnesses.append(fitness)
+
+    # The genome's fitness is its worst performance across all runs.
+    return min(fitnesses)
 
 
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
-        genome.fitness = 4.0
-        net = neat.nn.FeedForwardNetwork.create(genome, config)
-        for xi, xo in zip(xor_inputs, xor_outputs):
-            output = net.activate(xi)
-            genome.fitness -= (output[0] - xo[0]) ** 2
+        genome.fitness = eval_genome(genome, config)
 
 
-# Load configuration.
-config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                     neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                     'neat_config.cfg')
+def run():
+    # Load the config file, which is assumed to live in
+    # the same directory as this script.
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'neat_config.cfg')
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
 
-# Create the population, which is the top-level object for a NEAT run.
-p = neat.Population(config)
+    pop = neat.Population(config)
+    stats = neat.StatisticsReporter()
+    pop.add_reporter(stats)
+    pop.add_reporter(neat.StdOutReporter(True))
 
-# Add a stdout reporter to show progress in the terminal.
-p.add_reporter(neat.StdOutReporter(False))
+    pe = neat.ParallelEvaluator(6, eval_genome)
+    winner = pop.run(pe.evaluate)
 
-# Run until a solution is found.
-winner = p.run(eval_genomes)
+    # Save the winner.
+    with open('winner-feedforward', 'wb') as f:
+        pickle.dump(winner, f)
 
-# Display the winning genome.
-print('\nBest genome:\n{!s}'.format(winner))
+    visualize.plot_stats(stats, ylog=True, view=True, filename="feedforward-fitness.svg")
+    visualize.plot_species(stats, view=True, filename="feedforward-speciation.svg")
 
-# Show output of the most fit genome against training data.
-print('\nOutput:')
-winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
-for xi, xo in zip(xor_inputs, xor_outputs):
-    output = winner_net.activate(xi)
-    print("  input {!r}, expected output {!r}, got {!r}".format(xi, xo, output))
+    # node_names = {-1: 'x', -2: 'dx', -3: 'theta', -4: 'dtheta', 0: 'control'}
+    visualize.draw_net(config, winner, True)
+
+    # visualize.draw_net(config, winner, view=True, node_names=node_names,
+    #                    filename="winner-feedforward.gv")
+    # visualize.draw_net(config, winner, view=True, node_names=node_names,
+    #                    filename="winner-feedforward-enabled.gv", show_disabled=False)
+    # visualize.draw_net(config, winner, view=True, node_names=node_names,
+    #                    filename="winner-feedforward-enabled-pruned.gv", show_disabled=False, prune_unused=True)
+
+
+if __name__ == '__main__':
+    run()

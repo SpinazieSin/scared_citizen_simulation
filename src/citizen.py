@@ -27,7 +27,7 @@ class Citizen():
 
         # Agent stats.
         self.label = "C"
-        self.vision = np.zeros([])
+        self.vision = np.zeros([9, 9, 2])
         self.actions = {"Up":    (0, -1),
                         "Down":  (0, 1),
                         "Left":  (-1, 0),
@@ -42,11 +42,19 @@ class Citizen():
         self.fast_step_counter = 0
         self.is_wounded = False
 
+        # Agent decision
+        self.action_preference = [randint(10)/10. for i in range(len(self.action_keys))]
+
     def __repr__(self):
         return "Citizen at " + str(self.location)
 
     def calc_step(self):
-        return self.actions[self.action_keys[randint(self.actions_len)]]
+        print(self.action_preference)
+        print(self.action_keys)
+        print("Doing ", self.action_keys[np.argmax(self.action_preference)])
+        print("With coords", self.actions[self.action_keys[np.argmax(self.action_preference)]])
+        return self.actions[self.action_keys[np.argmax(self.action_preference)]]
+        # return self.actions[self.action_keys[randint(self.actions_len)]]
 
     def step(self, forced_step=None):
         return self.calc_step() if forced_step == None else forced_step

@@ -59,6 +59,8 @@ class Town:
     def iterate(self):
         # Move hunters
         for agent in self.hunters:
+            if randint(10) < 4:
+                continue
             target = self.citizens[randint(len(self.citizens))]
             move = agent.step(target=target.location)
             if self.is_legal_move(move, agent):
@@ -72,18 +74,29 @@ class Town:
             vision = np.zeros([9, 9, 2])
             vision[:, :, self.object_layer["B"]] = np.ones([9, 9])
             pos_x, pos_y = agent.location
-            x_max = pos_x+4 if pos_x+4 <= self.size else self.size 
-            y_max = pos_y+4 if pos_x+4 <= self.size else self.size
-            x_min = pos_x-4 if pos_x-4 >= 0 else 0
-            y_min = pos_y-4 if pos_y-4 >= 0 else 0
+            x_max = pos_x+5
+            y_max = pos_y+5
+            x_min = pos_x-4
+            y_min = pos_y-4
 
-            state_vision = self.state[x_min:x_max, y_min:y_max, :-1]
+            y_index = -1
+            for col in range(y_min, y_max):
+                y_index += 1
+                x_index = -1
+                if col < 0 or col > self.size - 1:
+                    continue
+                for row in range(x_min, x_max):
+                    x_index += 1
+                    if row < 0 or row > self.size - 1:
+                        continue
+                    for layer in range(self.layer_size - 1):
+                        object_at_pos = self.state[row, col, layer]
+                        vision[x_index, y_index, layer] = object_at_pos
 
-            print(vision)
-            print(vision.shape)
-            print(state_vision)
-            print(state_vision.shape)
-            return
+            # Print the vision here
+            # print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in vision[:,:, self.object_layer["B"]]]))
+
+            agent.vision = vision
             move = agent.step()
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
