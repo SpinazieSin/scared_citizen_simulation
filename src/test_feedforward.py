@@ -7,6 +7,7 @@ import os
 import pickle
 import neat
 import time
+import numpy as np
 from town import Town
 from neat import nn
 
@@ -31,14 +32,16 @@ sim = Town()
 sim = Town()
 sim.load_empty_state(size=10)
 sim.spawn_citizen(location=(5, 5))
-sim.spawn_hunter()
+sim.spawn_hunter(location=(3,3))
 
 caught = False
 max_sim_iterations = 100
 iteration = 0
 while iteration < max_sim_iterations:
     for citizen in sim.citizens:
-        inputs = citizen.vision.flatten()
+        inputs = np.transpose(citizen.vision).flatten()
+        print(inputs)
+        print("Shape ", inputs.shape)
         citizen.action_preference = net.activate(inputs)
 
     print(sim)
@@ -48,7 +51,8 @@ while iteration < max_sim_iterations:
     for citizen in sim.citizens:
         if citizen.score["caught"]:
             caught = True
-        fitness = (citizen.score["survival_time"]*10.)/citizen.score["steps"]
+        fitness = citizen.score["survival_time"]/float(max_sim_iterations)
+        print(fitness)
     if caught:
         break
 

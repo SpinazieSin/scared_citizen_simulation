@@ -3,6 +3,7 @@ import visualize
 import numpy as np
 import os
 import pickle
+from random import randint
 from town import Town
 
 runs_per_net = 5
@@ -19,9 +20,9 @@ def eval_genome(genome, config):
         sim.spawn_citizen(location=(5, 5))
         offsetx = 0
         offsety = 0
-        while offsetx != 0 and offsety != 0:
-            offsetx = randint(-5, 5)
-            offsety = randint(-5, 5)
+        while offsetx == 0 or offsety == 0:
+            offsetx = randint(-3, 3)
+            offsety = randint(-3, 3)
         sim.spawn_hunter(location=(5+offsetx, 5+offsety))
 
         # Run the given simulation for up to num_steps time steps.
@@ -31,7 +32,7 @@ def eval_genome(genome, config):
         iteration = 0
         while iteration < max_sim_iterations:
             for citizen in sim.citizens:
-                inputs = citizen.vision.flatten()
+                inputs = np.transpose(citizen.vision).flatten()
                 citizen.action_preference = net.activate(inputs)
 
             sim.iterate()
@@ -39,9 +40,9 @@ def eval_genome(genome, config):
             for citizen in sim.citizens:
                 if citizen.score["caught"]:
                     caught = True
-                fitness = citizen.score["survival_time"]/citizen.score["steps"]
+                fitness = ((citizen.score["survival_time"]*100.)/(citizen.score["steps"]+1))/(max_sim_iterations)
+                fitness = (citizen.score["survival_time"])/(max_sim_iterations)
             if caught:
-                fitness = citizen.score["survival_time"]
                 break
 
             iteration += 1
@@ -80,17 +81,7 @@ def run():
 
     visualize.plot_stats(stats, ylog=True, view=True, filename="feedforward-fitness.svg")
     visualize.plot_species(stats, view=True, filename="feedforward-speciation.svg")
-
-    # node_names = {-1: 'x', -2: 'dx', -3: 'theta', -4: 'dtheta', 0: 'control'}
     visualize.draw_net(config, winner, True)
-
-    # visualize.draw_net(config, winner, view=True, node_names=node_names,
-    #                    filename="winner-feedforward.gv")
-    # visualize.draw_net(config, winner, view=True, node_names=node_names,
-    #                    filename="winner-feedforward-enabled.gv", show_disabled=False)
-    # visualize.draw_net(config, winner, view=True, node_names=node_names,
-    #                    filename="winner-feedforward-enabled-pruned.gv", show_disabled=False, prune_unused=True)
-
 
 if __name__ == '__main__':
     run()

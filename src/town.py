@@ -59,7 +59,7 @@ class Town:
     def iterate(self):
         # Move hunters
         for agent in self.hunters:
-            if randint(10) < 4:
+            if randint(10) < 3:
                 continue
             target = self.citizens[randint(len(self.citizens))]
             move = agent.step(target=target.location)
@@ -71,13 +71,14 @@ class Town:
         # Move citizens
         for agent in self.citizens:
 
-            vision = np.zeros([9, 9, 2])
-            vision[:, :, self.object_layer["B"]] = np.ones([9, 9])
+            """
+            vision = np.zeros([7, 7, 2])
+            vision[:, :, self.object_layer["B"]] = np.ones([7, 7])
             pos_x, pos_y = agent.location
-            x_max = pos_x+5
-            y_max = pos_y+5
-            x_min = pos_x-4
-            y_min = pos_y-4
+            x_max = pos_x+4
+            y_max = pos_y+4
+            x_min = pos_x-3
+            y_min = pos_y-3
 
             y_index = -1
             for col in range(y_min, y_max):
@@ -92,11 +93,26 @@ class Town:
                     for layer in range(self.layer_size - 1):
                         object_at_pos = self.state[row, col, layer]
                         vision[x_index, y_index, layer] = object_at_pos
+            """
+            hunter_distance = np.clip(agent.location - self.hunters[0].location, -8, 8)/8.
+            hunter_distance_max = np.ones(2)
+            hunter_distance_min = np.ones(2)
+            for i in range(2):
+                if hunter_distance[i] < 0:
+                    hunter_distance_min[i] = np.abs(hunter_distance[i])
+                else:
+                    hunter_distance_max[i] = hunter_distance[i]
+
+            wall_distance_max = np.clip(np.array([self.size - agent.location[0], self.size - agent.location[1]]), 0, 8)/8.
+            wall_distance_min = np.clip(np.array([agent.location[0], agent.location[1]]), 0, 8)/8.
 
             # Print the vision here
             # print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in vision[:,:, self.object_layer["B"]]]))
+            agent.vision = np.array([hunter_distance_max,
+                                     hunter_distance_min,                
+                                     wall_distance_max,
+                                     wall_distance_min,]).flatten()
 
-            agent.vision = vision
             move = agent.step()
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)

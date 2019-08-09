@@ -27,11 +27,11 @@ class Citizen():
 
         # Agent stats.
         self.label = "C"
-        self.vision = np.zeros([9, 9, 2])
-        self.actions = {"Up":    (0, -1),
-                        "Down":  (0, 1),
-                        "Left":  (-1, 0),
-                        "Right": (1, 0),
+        self.vision = np.zeros(8)
+        self.actions = {"Left":    (0, -1),
+                        "Right":  (0, 1),
+                        "Up":  (-1, 0),
+                        "Down": (1, 0),
                         "Stand": (0, 0)}
         self.action_keys = list(self.actions.keys())
         self.actions_len = len(self.actions)
@@ -49,10 +49,10 @@ class Citizen():
         return "Citizen at " + str(self.location)
 
     def calc_step(self):
-        print(self.action_preference)
-        print(self.action_keys)
-        print("Doing ", self.action_keys[np.argmax(self.action_preference)])
-        print("With coords", self.actions[self.action_keys[np.argmax(self.action_preference)]])
+        # print(self.action_preference)
+        # print(self.action_keys)
+        # print("Doing ", self.action_keys[np.argmax(self.action_preference)])
+        # print("With coords", self.actions[self.action_keys[np.argmax(self.action_preference)]])
         return self.actions[self.action_keys[np.argmax(self.action_preference)]]
         # return self.actions[self.action_keys[randint(self.actions_len)]]
 
