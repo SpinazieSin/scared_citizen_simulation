@@ -12,7 +12,7 @@ from town import Town
 from neat import nn
 
 # load the winner
-with open('winner-feedforward.model', 'rb') as f:
+with open('models/winner-feedforward.model', 'rb') as f:
     c = pickle.load(f)
 
 print('Loaded genome:')
@@ -31,7 +31,7 @@ net = neat.nn.FeedForwardNetwork.create(c, config)
 sim = Town()
 sim = Town()
 sim.load_empty_state(size=10)
-sim.spawn_citizen(location=(5, 5))
+sim.spawn_citizen(location=(5, 5), ai_type="learning")
 sim.spawn_hunter(location=(3,3))
 
 caught = False

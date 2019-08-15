@@ -16,8 +16,8 @@ def eval_genome(genome, config):
 
     for runs in range(runs_per_net):
         sim = Town()
-        sim.load_empty_state(size=10)
-        sim.spawn_citizen(location=(5, 5))
+        sim.load_empty_state(size=20)
+        sim.spawn_citizen(location=(10, 10), ai_type="learning")
         offsetx = 0
         offsety = 0
         while offsetx == 0 or offsety == 0:
@@ -76,11 +76,11 @@ def run():
     winner = pop.run(pe.evaluate)
 
     # Save the winner.
-    with open('winner-feedforward.model', 'wb') as f:
+    with open('models/winner-feedforward.model', 'wb') as f:
         pickle.dump(winner, f)
 
-    visualize.plot_stats(stats, ylog=True, view=True, filename="feedforward-fitness.svg")
-    visualize.plot_species(stats, view=True, filename="feedforward-speciation.svg")
+    visualize.plot_stats(stats, ylog=True, view=True, filename="models/feedforward-fitness.svg")
+    # visualize.plot_species(stats, view=True, filename="models/feedforward-speciation.svg")
     visualize.draw_net(config, winner, True)
 
 if __name__ == '__main__':

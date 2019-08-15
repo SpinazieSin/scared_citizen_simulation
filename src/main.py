@@ -25,8 +25,30 @@ def run_simulation():
         count += 1
 
 
+def run_player_game():
+    t = Town()
+    t.load_empty_state(size=20)
+    t.spawn_player()
+    t.spawn_citizen(location=(15, 15), ai_type="smart")
+
+    count = 0
+    while True:
+        if count > 50:
+            break
+        print(t)
+        t.iterate()
+        for citizen in t.citizens:
+            if citizen.score["caught"]:
+                print("DONE")
+                print(citizen.score)
+                return
+        count += 1
+
+
 def main():
-    run_simulation()
+    # run_simulation()
+    run_player_game()
+    print("FINISHED")
 
 
 if __name__ == '__main__':

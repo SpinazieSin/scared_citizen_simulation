@@ -1,5 +1,7 @@
 import neat
 import numpy as np
+import pickle
+import os
 from numpy.random import randint
 
 
@@ -19,13 +21,14 @@ class Citizen():
 
     N_GEN = 100
 
-    def __init__(self, location=(0, 0)):
+    def __init__(self, location=(0, 0), ai_type="random"):
         # Performance evaluation criteria.
         self.score = {"caught": False,
                       "survival_time": 0,
                       "steps": 0}
 
         # Agent stats.
+        self.ai_type = ai_type
         self.label = "C"
         self.vision = np.zeros(8)
         self.actions = {"Left":    (0, -1),
@@ -43,7 +46,20 @@ class Citizen():
         self.is_wounded = False
 
         # Agent decision
-        self.action_preference = [randint(10)/10. for i in range(len(self.action_keys))]
+        self.action_preference = [
+            randint(10)/10. for i in range(len(self.action_keys))]
+
+        # Agent brain
+        with open('models/winner-feedforward.model', 'rb') as f:
+            c = pickle.load(f)
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, 'neat_config.cfg')
+        config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                             neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                             config_path)
+        self.net = neat.nn.FeedForwardNetwork.create(c, config)
+        # except:
+        #     print("No brain found")
 
     def __repr__(self):
         return "Citizen at " + str(self.location)
@@ -53,8 +69,10 @@ class Citizen():
         # print(self.action_keys)
         # print("Doing ", self.action_keys[np.argmax(self.action_preference)])
         # print("With coords", self.actions[self.action_keys[np.argmax(self.action_preference)]])
-        return self.actions[self.action_keys[np.argmax(self.action_preference)]]
-        # return self.actions[self.action_keys[randint(self.actions_len)]]
+        return self.actions[self.action_keys[{
+            "learning": np.argmax(self.action_preference),
+            "random": randint(self.actions_len),
+            "smart": np.argmax(self.net.activate(np.transpose(self.vision).flatten()))}[self.ai_type]]]
 
     def step(self, forced_step=None):
         return self.calc_step() if forced_step == None else forced_step

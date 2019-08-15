@@ -11,10 +11,10 @@ class Hunter():
     """
 
     def __init__(self, location=(0, 0)):
-        self.actions = {"Up":    (0, -1),
-                        "Down":  (0, 1),
-                        "Left":  (-1, 0),
-                        "Right": (1, 0),
+        self.actions = {"Left":    (0, -1),
+                        "Right":  (0, 1),
+                        "Up":  (-1, 0),
+                        "Down": (1, 0),
                         "Stab": (0, 0)}
         self.action_keys = list(self.actions.keys())
         self.actions_len = len(self.actions)

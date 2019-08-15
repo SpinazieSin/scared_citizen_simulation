@@ -16,11 +16,17 @@ class Town:
         self.objects = []
         self.hunters = []
         self.citizens = []
+        self.player_hunters = []
         self.object_layer = {"B": 0,
                              "H": 1,
                              "C": 2}
         self.object_layer_keys = ["B", "H", "C"]
+        self.legal_player_moves = {"w": "Up",
+                                   "a": "Left",
+                                   "s": "Down",
+                                   "d": "Right"}
         self.layer_size = len(self.object_layer_keys)
+        self.iteration = 0
 
     def __repr__(self):
         state_string = ""
@@ -57,12 +63,24 @@ class Town:
                     self.object_layer[agent.label])] = 1
 
     def iterate(self):
+        # Increment step
+        self.iteration += 1
+
+        # Move players
+        for agent in self.player_hunters:
+            target = self.citizens[randint(len(self.citizens))]
+            move = self.move_player(agent)
+            if self.is_legal_move(move, agent):
+                self.move_agent(agent, move)
+                if np.array_equal(agent.location, target.location):
+                    target.score["caught"] = True
+
         # Move hunters
         for agent in self.hunters:
-            if randint(10) < 3:
-                continue
             target = self.citizens[randint(len(self.citizens))]
             move = agent.step(target=target.location)
+            if self.iteration % 2 == 0 and 0 not in target.location - agent.location:
+                continue
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
                 if np.array_equal(agent.location, target.location):
@@ -94,24 +112,33 @@ class Town:
                         object_at_pos = self.state[row, col, layer]
                         vision[x_index, y_index, layer] = object_at_pos
             """
-            hunter_distance = np.clip(agent.location - self.hunters[0].location, -8, 8)/8.
+
+            closest_hunter = (100, 100)
+            for hunter in self.hunters + self.player_hunters:
+                hunter_distance = np.clip(
+                    agent.location - hunter.location, -8, 8)/8.
+                if sum(hunter_distance) < sum(closest_hunter):
+                    closest_hunter = hunter_distance
+
             hunter_distance_max = np.ones(2)
             hunter_distance_min = np.ones(2)
             for i in range(2):
                 if hunter_distance[i] < 0:
-                    hunter_distance_min[i] = np.abs(hunter_distance[i])
+                    hunter_distance_min[i] = np.abs(closest_hunter[i])
                 else:
-                    hunter_distance_max[i] = hunter_distance[i]
+                    hunter_distance_max[i] = closest_hunter[i]
 
-            wall_distance_max = np.clip(np.array([self.size - agent.location[0], self.size - agent.location[1]]), 0, 8)/8.
-            wall_distance_min = np.clip(np.array([agent.location[0], agent.location[1]]), 0, 8)/8.
+            wall_distance_max = np.clip(np.array(
+                [self.size - agent.location[0], self.size - agent.location[1]]), 0, 8)/8.
+            wall_distance_min = np.clip(
+                np.array([agent.location[0], agent.location[1]]), 0, 8)/8.
 
             # Print the vision here
             # print('\n'.join(['\t'.join([str(cell) for cell in row]) for row in vision[:,:, self.object_layer["B"]]]))
             agent.vision = np.array([hunter_distance_max,
-                                     hunter_distance_min,                
+                                     hunter_distance_min,
                                      wall_distance_max,
-                                     wall_distance_min,]).flatten()
+                                     wall_distance_min, ]).flatten()
 
             move = agent.step()
             if self.is_legal_move(move, agent):
@@ -136,9 +163,19 @@ class Town:
         self.hunters.append(Hunter(location))
         self.state[(location[0], location[1], self.object_layer["H"])] = 1
 
-    def spawn_citizen(self, location=(0, 0)):
+    def spawn_citizen(self, location=(0, 0), ai_type="learning"):
         self.citizens.append(Citizen(location))
         self.state[(location[0], location[1], self.object_layer["C"])] = 1
+
+    def spawn_player(self, location=(0, 0)):
+        self.player_hunters.append(Hunter(location))
+        self.state[(location[0], location[1], self.object_layer["H"])] = 1
+
+    def move_player(self, agent):
+        player_input = ""
+        while player_input not in self.legal_player_moves:
+            player_input = input("Enter Move: ")
+        return agent.actions[self.legal_player_moves[player_input]]
 
 
 if __name__ == '__main__':
