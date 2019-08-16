@@ -16,8 +16,9 @@ class Hunter():
                         "Up":  (-1, 0),
                         "Down": (1, 0),
                         "Stab": (0, 0)}
-        self.action_keys = list(self.actions.keys())
+        self.action_keys = ["Left", "Right", "Up", "Down" "Stab"]
         self.actions_len = len(self.actions)
+
         self.label = "H"
         self.location = np.array([location[0], location[1]])
 

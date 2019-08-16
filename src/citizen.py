@@ -21,7 +21,7 @@ class Citizen():
 
     N_GEN = 100
 
-    def __init__(self, location=(0, 0), ai_type="random"):
+    def __init__(self, location=(0, 0), ai_type=None):
         # Performance evaluation criteria.
         self.score = {"caught": False,
                       "survival_time": 0,
@@ -36,7 +36,7 @@ class Citizen():
                         "Up":  (-1, 0),
                         "Down": (1, 0),
                         "Stand": (0, 0)}
-        self.action_keys = list(self.actions.keys())
+        self.action_keys = ["Left", "Right", "Up", "Down", "Stand"]
         self.actions_len = len(self.actions)
 
         # Agent vars.
@@ -50,16 +50,17 @@ class Citizen():
             randint(10)/10. for i in range(len(self.action_keys))]
 
         # Agent brain
-        with open('models/winner-feedforward.model', 'rb') as f:
-            c = pickle.load(f)
-        local_dir = os.path.dirname(__file__)
-        config_path = os.path.join(local_dir, 'neat_config.cfg')
-        config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                             neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                             config_path)
-        self.net = neat.nn.FeedForwardNetwork.create(c, config)
-        # except:
-        #     print("No brain found")
+        try:
+            with open('models/winner-feedforward.model', 'rb') as f:
+                c = pickle.load(f)
+            local_dir = os.path.dirname(__file__)
+            config_path = os.path.join(local_dir, 'neat_config.cfg')
+            config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                                 neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                 config_path)
+            self.net = neat.nn.FeedForwardNetwork.create(c, config)
+        except:
+            self.net = None
 
     def __repr__(self):
         return "Citizen at " + str(self.location)
@@ -69,10 +70,17 @@ class Citizen():
         # print(self.action_keys)
         # print("Doing ", self.action_keys[np.argmax(self.action_preference)])
         # print("With coords", self.actions[self.action_keys[np.argmax(self.action_preference)]])
+
+        # print(np.argmax(self.net.activate(np.transpose(self.vision).flatten())))
+        # print(self.net.activate(np.transpose(self.vision).flatten()))
+        # print(self.action_keys[np.argmax(
+        #     self.net.activate(np.transpose(self.vision).flatten()))])
+        # return (0, 0)
+
         return self.actions[self.action_keys[{
             "learning": np.argmax(self.action_preference),
-            "random": randint(self.actions_len),
-            "smart": np.argmax(self.net.activate(np.transpose(self.vision).flatten()))}[self.ai_type]]]
+            "smart": np.argmax(self.net.activate(np.transpose(self.vision).flatten())),
+            "random": randint(self.actions_len)}[self.ai_type]]]
 
     def step(self, forced_step=None):
         return self.calc_step() if forced_step == None else forced_step

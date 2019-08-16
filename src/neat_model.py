@@ -80,7 +80,7 @@ def run():
         pickle.dump(winner, f)
 
     visualize.plot_stats(stats, ylog=True, view=True, filename="models/feedforward-fitness.svg")
-    # visualize.plot_species(stats, view=True, filename="models/feedforward-speciation.svg")
+    visualize.plot_species(stats, view=True, filename="models/feedforward-speciation.svg")
     visualize.draw_net(config, winner, True)
 
 if __name__ == '__main__':

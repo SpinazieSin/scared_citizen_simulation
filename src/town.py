@@ -27,6 +27,7 @@ class Town:
                                    "d": "Right"}
         self.layer_size = len(self.object_layer_keys)
         self.iteration = 0
+        self.same_location = np.array([0, 0])
 
     def __repr__(self):
         state_string = ""
@@ -69,21 +70,25 @@ class Town:
         # Move players
         for agent in self.player_hunters:
             target = self.citizens[randint(len(self.citizens))]
+            if np.array_equal(target.location - agent.location, self.same_location):
+                target.score["caught"] = True
             move = self.move_player(agent)
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
-                if np.array_equal(agent.location, target.location):
+                if np.array_equal(target.location - agent.location, self.same_location):
                     target.score["caught"] = True
 
         # Move hunters
         for agent in self.hunters:
             target = self.citizens[randint(len(self.citizens))]
+            if np.array_equal(target.location - agent.location, self.same_location):
+                target.score["caught"] = True
             move = agent.step(target=target.location)
-            if self.iteration % 2 == 0 and 0 not in target.location - agent.location:
+            if self.iteration % 4 == 0 and not np.array_equal(target.location - agent.location, self.same_location):
                 continue
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
-                if np.array_equal(agent.location, target.location):
+                if np.array_equal(target.location - agent.location, self.same_location):
                     target.score["caught"] = True
 
         # Move citizens
@@ -164,7 +169,7 @@ class Town:
         self.state[(location[0], location[1], self.object_layer["H"])] = 1
 
     def spawn_citizen(self, location=(0, 0), ai_type="learning"):
-        self.citizens.append(Citizen(location))
+        self.citizens.append(Citizen(location, ai_type))
         self.state[(location[0], location[1], self.object_layer["C"])] = 1
 
     def spawn_player(self, location=(0, 0)):
