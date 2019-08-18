@@ -33,10 +33,15 @@ class Hunter():
             # if 0 in heuristic:
             #     return (0, 0)
             try:
-                if np.abs(heuristic[0]) >= np.abs(heuristic[1]):
+                if np.abs(heuristic[0]) > np.abs(heuristic[1]):
                     return (int(heuristic[0]/np.abs(heuristic[0])), 0)
-                else:
+                elif np.abs(heuristic[0]) > np.abs(heuristic[1]):
                     return (0, int(heuristic[1]/np.abs(heuristic[1])))
+                else:
+                    if randint(0, 1):
+                        return (int(heuristic[0]/np.abs(heuristic[0])), 0)
+                    else:
+                        return (0, int(heuristic[1]/np.abs(heuristic[1])))
             except:
                 return (0, 0)
         except:
