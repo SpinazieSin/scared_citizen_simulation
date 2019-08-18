@@ -21,6 +21,7 @@ class Hunter():
 
         self.label = "H"
         self.location = np.array([location[0], location[1]])
+        self.queued_move = (0, 0)
 
     def __repr__(self):
         return "Hunter at " + str(self.location)

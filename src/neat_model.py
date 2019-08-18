@@ -20,7 +20,7 @@ def eval_genome(genome, config):
         sim.spawn_citizen(location=(10, 10), ai_type="learning")
         offsetx = 0
         offsety = 0
-        while offsetx == 0 or offsety == 0:
+        while np.abs(offsetx) < 2 or np.abs(offsety) < 2:
             offsetx = randint(-3, 3)
             offsety = randint(-3, 3)
         sim.spawn_hunter(location=(5+offsetx, 5+offsety))

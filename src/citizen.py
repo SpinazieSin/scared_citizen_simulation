@@ -44,6 +44,7 @@ class Citizen():
         self.stamina = 100
         self.fast_step_counter = 0
         self.is_wounded = False
+        self.queud_move = (0, 0)
 
         # Agent decision
         self.action_preference = [

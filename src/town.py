@@ -70,26 +70,22 @@ class Town:
         # Move players
         for agent in self.player_hunters:
             target = self.citizens[randint(len(self.citizens))]
-            if np.array_equal(target.location - agent.location, self.same_location):
+            if False not in ((target.location - agent.location) <= (1, 1)):
                 target.score["caught"] = True
             move = self.move_player(agent)
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
-                if np.array_equal(target.location - agent.location, self.same_location):
-                    target.score["caught"] = True
 
         # Move hunters
         for agent in self.hunters:
             target = self.citizens[randint(len(self.citizens))]
-            if np.array_equal(target.location - agent.location, self.same_location):
+            if False not in ((target.location - agent.location) <= (1, 1)):
                 target.score["caught"] = True
             move = agent.step(target=target.location)
-            #if self.iteration % 0 == 0 and not np.array_equal(target.location - agent.location, self.same_location):
-            #    continue
+            if self.iteration % 3 + randint(-1, 1) == 0 and not np.array_equal(target.location - agent.location, self.same_location):
+               continue
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
-                if np.array_equal(target.location - agent.location, self.same_location):
-                    target.score["caught"] = True
 
         # Move citizens
         for agent in self.citizens:
@@ -143,7 +139,7 @@ class Town:
             agent.vision = np.array([hunter_distance_max,
                                      hunter_distance_min,
                                      wall_distance_max,
-                                     wall_distance_min, ]).flatten()
+                                     wall_distance_min]).flatten()
 
             move = agent.step()
             if self.is_legal_move(move, agent):
