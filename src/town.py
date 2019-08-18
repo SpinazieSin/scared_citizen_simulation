@@ -84,8 +84,8 @@ class Town:
             if np.array_equal(target.location - agent.location, self.same_location):
                 target.score["caught"] = True
             move = agent.step(target=target.location)
-            if self.iteration % 4 == 0 and not np.array_equal(target.location - agent.location, self.same_location):
-                continue
+            #if self.iteration % 0 == 0 and not np.array_equal(target.location - agent.location, self.same_location):
+            #    continue
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
                 if np.array_equal(target.location - agent.location, self.same_location):
