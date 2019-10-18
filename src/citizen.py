@@ -45,6 +45,7 @@ class Citizen():
         self.fast_step_counter = 0
         self.is_wounded = False
         self.queud_move = (0, 0)
+        self.queued_action = 0
 
         # Agent decision
         self.action_preference = [
@@ -55,7 +56,7 @@ class Citizen():
             with open('models/winner-feedforward.model', 'rb') as f:
                 c = pickle.load(f)
             local_dir = os.path.dirname(__file__)
-            config_path = os.path.join(local_dir, 'neat_config.cfg')
+            config_path = os.path.join(local_dir, 'configs/neat_config.cfg')
             config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                  neat.DefaultSpeciesSet, neat.DefaultStagnation,
                                  config_path)
@@ -79,6 +80,7 @@ class Citizen():
         # return (0, 0)
 
         return self.actions[self.action_keys[{
+            "rl": self.queued_action,
             "learning": np.argmax(self.action_preference),
             "smart": np.argmax(self.net.activate(np.transpose(self.vision).flatten())),
             "random": randint(self.actions_len)}[self.ai_type]]]

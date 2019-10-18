@@ -35,7 +35,7 @@ def run_player_game():
     count = 0
     while True:
         for citizen in t.citizens:
-            inputs = np.transpose(citizen.vision).flatten()
+            inputs = citizen.vision.flatten()
             print("Inputs", inputs)
             # citizen.action_preference = net.activate(inputs)
 

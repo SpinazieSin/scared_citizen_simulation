@@ -1,5 +1,6 @@
 import numpy as np
 import neat as nt
+from discrete import Discrete
 from numpy.random import randint
 from citizen import Citizen
 from hunter import Hunter, PlayerHunter
@@ -26,6 +27,7 @@ class Town:
                                    "s": "Down",
                                    "d": "Right"}
         self.layer_size = len(self.object_layer_keys)
+        self.action_space = Discrete(len(self.object_layer_keys))
         self.iteration = 0
         self.same_location = np.array([0, 0])
 
@@ -83,7 +85,7 @@ class Town:
                 target.score["caught"] = True
             move = agent.step(target=target.location)
             if self.iteration % 3 + randint(-1, 1) == 0 and not np.array_equal(target.location - agent.location, self.same_location):
-               continue
+                continue
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
 
@@ -113,6 +115,10 @@ class Town:
                         object_at_pos = self.state[row, col, layer]
                         vision[x_index, y_index, layer] = object_at_pos
             """
+
+            # agent.vision = np.ones([4, 5])
+            # for search_range in [(-4, 4), (5)]:
+            #     return
 
             closest_hunter = (100, 100)
             for hunter in self.hunters + self.player_hunters:
@@ -144,6 +150,23 @@ class Town:
             move = agent.step()
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
+    
+    def step(self, action = 0):
+        citizen = self.citizens[0]
+        citizen.queued_action = action
+        observation = citizen.vision
+        self.iterate()
+        reward = 1. if citizen.score["caught"] else 0.
+        done = True if reward == 1 else False
+        info = {}
+        return observation, reward, done, info
+
+    def reset(self):
+        self.hunters = []
+        self.citizens = []
+        self.load_empty_state()
+        self.spawn_citizen(location=(25, 25), ai_type = "rl")
+        self.spawn_hunter(location=(22, 22))
 
     def load_state_from_file(self, path):
         f = open(path, "r")
@@ -184,5 +207,6 @@ if __name__ == '__main__':
     # t.load_state_from_file(path="layouts/basic_layout.txt")
     t.load_empty_state()
     t.spawn_citizen(location=(25, 25))
+    t.spawn_hunter(location=(24, 24))
     t.iterate()
-    print(t)
+    # print(t.citizens[0].vision)

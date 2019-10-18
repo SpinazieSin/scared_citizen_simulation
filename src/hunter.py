@@ -46,7 +46,7 @@ class Hunter():
             except:
                 return (0, 0)
         except:
-            return self.actions[self.action_keys[randint(self.actions_len)]]
+            return self.actions[np.random.choose(action_keys)]
 
     def step(self, forced_step=None, target=None):
         return self.calc_step(target) if forced_step == None else forced_step

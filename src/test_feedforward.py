@@ -21,7 +21,7 @@ print(c)
 # Load the config file, which is assumed to live in
 # the same directory as this script.
 local_dir = os.path.dirname(__file__)
-config_path = os.path.join(local_dir, 'neat_config.cfg')
+config_path = os.path.join(local_dir, 'configs/neat_config.cfg')
 config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                      neat.DefaultSpeciesSet, neat.DefaultStagnation,
                      config_path)
@@ -39,7 +39,7 @@ max_sim_iterations = 100
 iteration = 0
 while iteration < max_sim_iterations:
     for citizen in sim.citizens:
-        inputs = np.transpose(citizen.vision).flatten()
+        inputs = citizen.vision.flatten()
         print(inputs)
         print("Shape ", inputs.shape)
         citizen.action_preference = net.activate(inputs)
