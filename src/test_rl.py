@@ -1,6 +1,7 @@
 import numpy as np
 import gym
 import town
+import time
 
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten
@@ -9,9 +10,6 @@ from keras.optimizers import Adam
 from rl.agents.cem import CEMAgent
 from rl.memory import EpisodeParameterMemory
 
-
-
-# Get the environment and extract the number of actions.
 env = town.Town()
 env.reset()
 
@@ -36,6 +34,12 @@ cem = CEMAgent(model=model, nb_actions=nb_actions, memory=memory,
                batch_size=50, nb_steps_warmup=2000, train_interval=50, elite_frac=0.05)
 cem.compile()
 
-cem.fit(env, nb_steps=100000, visualize=False, verbose=2)
 
-cem.save_weights('cem_{}_params.h5f'.format("citizen-0"), overwrite=True)
+cem.load_weights('cem_{}_params.h5f'.format("citizen-0"))
+
+for move in range(100):
+    env.step(cem.forward(env.citizens[0].vision))
+    print(env.citizens[0].score)
+    time.sleep(0.05)
+    print(env)
+

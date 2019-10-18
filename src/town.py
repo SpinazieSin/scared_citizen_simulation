@@ -156,19 +156,18 @@ class Town:
         citizen.queued_action = action
         observation = citizen.vision
         self.iterate()
-        reward = 1. if citizen.score["caught"] else 0.
+        reward = 1. if citizen.score["caught"] else -10.
         done = True if reward == 1 else False
         info = {}
+        print(self)
         return observation, reward, done, info
 
     def reset(self):
         self.hunters = []
         self.citizens = []
-        self.load_empty_state()
-        self.spawn_citizen(location=(25, 25), ai_type = "rl")
-        self.spawn_hunter(location=(22, 22))
-        print(self.citizens[0].vision)
-        print(self.citizens[0].vision.shape)
+        self.load_empty_state(20)
+        self.spawn_citizen(location=(10, 10), ai_type = "rl")
+        self.spawn_hunter(location=(6, 7))
         return self.citizens[0].vision.flatten()
 
     def load_state_from_file(self, path):
