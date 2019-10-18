@@ -19,8 +19,7 @@ nb_actions = env.action_space.n
 obs_dim = env.citizens[0].vision.shape[0]
 
 model = Sequential()
-model.add(Flatten(input_shape=(4,) + env.citizens[0].vision.shape))
-model.add(Dense(nb_actions))
+model.add(Dense(nb_actions, input_shape=(8,)))
 model.add(Activation('softmax'))
 
 print(model.summary())

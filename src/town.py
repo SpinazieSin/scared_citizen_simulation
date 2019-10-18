@@ -167,6 +167,9 @@ class Town:
         self.load_empty_state()
         self.spawn_citizen(location=(25, 25), ai_type = "rl")
         self.spawn_hunter(location=(22, 22))
+        print(self.citizens[0].vision)
+        print(self.citizens[0].vision.shape)
+        return self.citizens[0].vision.flatten()
 
     def load_state_from_file(self, path):
         f = open(path, "r")
