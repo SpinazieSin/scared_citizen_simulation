@@ -4,7 +4,7 @@ import town
 import time
 
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten
+from keras.layers import Dense, Activation, Flatten, BatchNormalization
 from keras.optimizers import Adam
 
 from rl.agents.cem import CEMAgent
@@ -17,9 +17,12 @@ nb_actions = env.action_space.n
 obs_dim = env.citizens[0].vision.shape[0]
 
 model = Sequential()
-model.add(Dense(16, input_shape=(8,)))
+model.add(Dense(128, input_shape=(8,)))
 model.add(Activation('relu'))
-model.add(Dense(16))
+model.add(BatchNormalization())
+model.add(Dense(64))
+model.add(Activation('relu'))
+model.add(Dense(32))
 model.add(Activation('relu'))
 model.add(Dense(16))
 model.add(Activation('relu'))
@@ -27,6 +30,7 @@ model.add(Dense(nb_actions))
 model.add(Activation('softmax'))
 
 print(model.summary())
+
 
 memory = EpisodeParameterMemory(limit=1000, window_length=1)
 
@@ -38,7 +42,9 @@ cem.compile()
 cem.load_weights('cem_{}_params.h5f'.format("citizen-0"))
 
 for move in range(100):
-    env.step(cem.forward(env.citizens[0].vision))
+    action = cem.forward(env.citizens[0].vision)
+    print(action)
+    env.step(action)
     print(env.citizens[0].score)
     time.sleep(0.05)
     print(env)

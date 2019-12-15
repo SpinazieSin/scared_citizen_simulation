@@ -27,7 +27,7 @@ class Town:
                                    "s": "Down",
                                    "d": "Right"}
         self.layer_size = len(self.object_layer_keys)
-        self.action_space = Discrete(len(self.object_layer_keys))
+        self.action_space = Discrete(len(self.legal_player_moves))
         self.iteration = 0
         self.same_location = np.array([0, 0])
 
@@ -146,8 +146,12 @@ class Town:
                                      hunter_distance_min,
                                      wall_distance_max,
                                      wall_distance_min]).flatten()
+            # print(agent.vision)
+            # print("hunter_distance_max: ", hunter_distance_max)
+            # print("hunter_distance_min: ", hunter_distance_min)
 
             move = agent.step()
+            agent.score["survival_time"] += 1
             if self.is_legal_move(move, agent):
                 self.move_agent(agent, move)
     
@@ -155,11 +159,16 @@ class Town:
         citizen = self.citizens[0]
         citizen.queued_action = action
         observation = citizen.vision
+        possible_reward = citizen.score["steps"]
         self.iterate()
-        reward = 1. if citizen.score["caught"] else -10.
-        done = True if reward == 1 else False
+        reward = possible_reward + 0 if not citizen.score["caught"] else -100.
+        # print("reward: ", reward)
+        # print("vision: ", citizen.vision)
+        # print("action_key: ", action)
+        # print("action: ", citizen.calc_step())
+        done = citizen.score["caught"]
         info = {}
-        print(self)
+        # print(self)
         return observation, reward, done, info
 
     def reset(self):

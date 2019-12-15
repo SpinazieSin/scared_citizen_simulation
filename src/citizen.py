@@ -24,8 +24,8 @@ class Citizen():
     def __init__(self, location=(0, 0), ai_type=None):
         # Performance evaluation criteria.
         self.score = {"caught": False,
-                      "survival_time": 0,
-                      "steps": 0}
+                      "survival_time": 1,
+                      "steps": 1}
 
         # Agent stats.
         self.ai_type = ai_type
@@ -90,7 +90,6 @@ class Citizen():
 
     def update_location(self, move=(0, 0)):
         self.location += move
-        self.score["survival_time"] += 1
         self.score["steps"] += sum(np.abs(move))
 
 

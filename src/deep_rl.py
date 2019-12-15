@@ -3,7 +3,7 @@ import gym
 import town
 
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten
+from keras.layers import Dense, Activation, Flatten, BatchNormalization, LeakyReLU
 from keras.optimizers import Adam
 
 from rl.agents.cem import CEMAgent
@@ -19,9 +19,12 @@ nb_actions = env.action_space.n
 obs_dim = env.citizens[0].vision.shape[0]
 
 model = Sequential()
-model.add(Dense(16, input_shape=(8,)))
+model.add(Dense(128, input_shape=(8,)))
 model.add(Activation('relu'))
-model.add(Dense(16))
+model.add(BatchNormalization())
+model.add(Dense(64))
+model.add(Activation('relu'))
+model.add(Dense(32))
 model.add(Activation('relu'))
 model.add(Dense(16))
 model.add(Activation('relu'))
